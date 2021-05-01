@@ -3,6 +3,9 @@
 % Debug mode.
 debug_mode	= false;
 
+% Support for non-regular files, which have been saved as a *.set file beforehand.
+set_mode = true;
+
 % Channel extraction and position information.
 cfg.channels	= 1 : 64;
 cfg.pos_file	= 'BioSemi_SRM_template_64_locs.xyz';			% ( file must be on the MATLAB path )
@@ -30,7 +33,7 @@ cfg.itr_reref.hp_filter	= 1;
 cfg.itr_reref.lp_filter	= 0;
 
 % High-pass filtering.
-cfg.hp_filter	= 1;
+cfg.hp_filter	= 0.1;
 
 % Low-pass filtering.
 cfg.lp_filter	= 40;
@@ -57,29 +60,33 @@ cfg.ampstat( 1 ).lp_filter	= 0;			cfg.ampstat( 2 ).lp_filter	= 0;
 cfg.ampstat( 1 ).z_score	= 'off';		cfg.ampstat( 2 ).z_score	= 'on';
 cfg.ampstat( 1 ).stat		= 'sd';			cfg.ampstat( 2 ).stat		= 'rms';
 cfg.ampstat( 1 ).interval	= 5;			cfg.ampstat( 2 ).interval	= 5;
-cfg.ampstat( 1 ).threshold	= 40;			cfg.ampstat( 2 ).threshold	= 3;
+cfg.ampstat( 1 ).threshold	= 40;			cfg.ampstat( 2 ).threshold	= 2.5;
 cfg.ampstat( 1 ).fraction	= 0.50;			cfg.ampstat( 2 ).fraction	= 1;
 cfg.ampstat( 1 ).rej_buffer	= 2;			cfg.ampstat( 2 ).rej_buffer	= 2;
-cfg.ampstat( 1 ).chan_frac	= 1;			cfg.ampstat( 2 ).chan_frac	= 0.10;
+cfg.ampstat( 1 ).chan_frac	= 1;			cfg.ampstat( 2 ).chan_frac	= 0.05;
 cfg.ampstat( 1 ).x_tick		= [ ];			cfg.ampstat( 2 ).x_tick		= [ ];
 cfg.ampstat( 1 ).visible	= 'off';		cfg.ampstat( 2 ).visible	= 'off';
 
 % Independent component removal.
 cfg.ic_rem.auto_comp_sub	= true;
-cfg.ic_rem.label_threshold	= 0.80;
+cfg.ic_rem.label_threshold	= 0.85;
 cfg.ic_rem.remove_types		= { 'eye', 'muscle' };
 
 %% Preparation
 
 % Make sure EEGLAB (base directory), NoiseTools and support functions are added to the MATLAB path.
-AddPath ( 'reset' );
+%AddPath ( 'reset' );
 AddPath ( 'eeglab' );
 AddPath ( 'noisetools' );
 AddPath ( 'support' );
 
 % Select files.
 ch_verbose ( 'Select input file(s)...', 2, 2 );
-files = ch_selectfiles ( 'bdf', 'on' );
+if set_mode == false
+	files = ch_selectfiles ( 'bdf', 'on' );
+else
+	files = ch_selectfiles ( 'set', 'on' );
+end
 
 % Select the output directory.
 ch_verbose ( 'Select output directory...', 2, 2 );
@@ -130,12 +137,16 @@ for file = 1 : numel ( files )
 		% Load file (if pop_fileio crashes, pop_readbdf is used instead).
 		ch_output_separator;
 		ch_verbose ( sprintf( 'Importing file: %s...', files( file ).name ), 2, 2 );
-		try
-			EEG = pop_fileio ( sprintf( '%s/%s', files( file ).folder, files( file ).name ) );
-		catch
-			ch_verbose ( 'WARNING! pop_fileio crashed. Trying pop_biosig. Referencing to first channel.', 2, 2 );
-			
-			EEG = pop_biosig ( sprintf( '%s/%s', files( file ).folder, files( file ).name ), 'ref', 1, 'refoptions', { 'keepref', 'on' } );
+		if set_mode == false
+			try
+				EEG = pop_fileio ( sprintf( '%s/%s', files( file ).folder, files( file ).name ) );
+			catch
+				ch_verbose ( 'WARNING! pop_fileio crashed. Trying pop_biosig. Referencing to first channel.', 2, 2 );
+				
+				EEG = pop_biosig ( sprintf( '%s/%s', files( file ).folder, files( file ).name ), 'ref', 1, 'refoptions', { 'keepref', 'on' } );
+			end
+		else
+			EEG = pop_loadset( sprintf( '%s/%s', files( file ).folder, files( file ).name ) );
 		end
 		
 		% Select channels and add channels position information.
@@ -206,7 +217,11 @@ for file = 1 : numel ( files )
 		
 		% Run the label function.
 		label_events = label_fnc ( );
-		EEG	= ch_label_events ( EEG, label_events, false, false );
+		if set_mode == false
+			EEG	= ch_label_events ( EEG, label_events, false, false );
+		else
+			EEG	= ch_label_events ( EEG, label_events, true, false );
+		end
 		
 		% Resample data.
 		if ~isempty ( cfg.resample )

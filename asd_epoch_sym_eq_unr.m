@@ -7,7 +7,8 @@ debug_mode	= true;
 cfg.group	= 'patient';
 
 % Events.
-cfg.events.related		= { 'Im B1 Sym', 'Im B1 Eqv', 'Im B2 Sym', 'Im B2 Eqv' };
+cfg.events.symmetry		= { 'Im B1 Sym',  'Im B2 Sym' };
+cfg.events.equivalence	= { 'Im B1 Eqv', 'Im B2 Eqv' };
 cfg.events.unrelated	= { 'Im B1 UR1', 'Im B1 UR2', 'Im B2 UR1', 'Im B2 UR2' };
 
 % Re-reference.
@@ -15,21 +16,57 @@ cfg.reref		= { 'P9', 'P10' };
 cfg.montage		= '64';
 
 % Epoch segmentation.
-cfg.epoch.events	= { 'related', 'unrelated' };
+cfg.epoch.events	= { 'symmetry', 'equivalence', 'unrelated' };
 cfg.epoch.limits	= [ -600, 1000 ];
 cfg.epoch.baseline	= [ -200, 0 ];
 
 % Epoch rejection.
-cfg.ep_rej.channels			= { 'POz', 'Pz', 'CPz', 'Cz', 'FCz', 'Fz' };
+cfg.ep_rej.channels			= { ...
+	'F1', 'F3', 'F5', 'FC5', 'FC3', 'FC1', ...
+	'Fz', 'FCz', ...
+	'F2', 'F4', 'F6', 'FC6', 'FC4', 'FC2', ...
+	'C1', 'C3', 'C5', 'CP5', 'CP3', 'CP1', ...
+	'CPz', 'Cz', ...
+	'C2', 'C4', 'C6', 'CP6', 'CP4', 'CP2', ...
+	'P1', 'P3', 'P5', 'PO3', ...
+	'POz', 'Pz', ...
+	'P2', 'P4', 'P6', 'PO4' };
 cfg.ep_rej.abs_threshold	= [ -75, 75 ];
 cfg.ep_rej.abs_timewindow	= [ -600, 1000 ];
 cfg.ep_rej.prob_thresh_loc	= 3;
 cfg.ep_rej.prob_thresh_glob	= 20;
 
+% Single trial plotting (see ch_vis_st_erp for configuration details).
+cfg.st_plot.events		= { 'symmetry', 'equivalence'; 'unrelated', { 'symmetry', 'equivalence', 'unrelated' } };
+cfg.st_plot.cond_label	= { 'Symmetry', 'Equivalence', 'Unrelated', 'All' };
+cfg.st_plot.channel		= { 'Cz', 'FCz', 'CPz' };
+cfg.st_plot.reref		= [ ];
+cfg.st_plot.montage		= '64';
+cfg.st_plot.bl_corr		= [ ];
+cfg.st_plot.x_limits	= [ -200, 700 ];
+cfg.st_plot.x_ticks		= 50;
+cfg.st_plot.y_limits	= 'auto';
+cfg.st_plot.y_ticks		= 4;
+
+% Conditions comparison plot.
+cfg.comp_plot.events		= { 'symmetry'; 'equivalence'; 'unrelated' };
+cfg.comp_plot.cond_label	= { 'Symmetry', 'Equivalence', 'Unrelated' };
+cfg.comp_plot.variance		= 'none';
+cfg.comp_plot.channel		= { 'Cz', 'FCz', 'CPz' };
+cfg.comp_plot.reref			= [ ];
+cfg.comp_plot.montage		= '64';
+cfg.comp_plot.bl_corr		= [ ];
+cfg.comp_plot.colour		= { [ 0, 0, 0, 0.75 ], [ 1, 0, 0, 0.75 ], [ 0, 1, 0, 0.75 ] };
+cfg.comp_plot.x_limits		= [ -200, 700 ];
+cfg.comp_plot.x_ticks		= 50;
+cfg.comp_plot.y_limits		= 'auto';
+cfg.comp_plot.y_ticks		= 4;
+cfg.comp_plot.visible		= 'off';
+
 %% Preparation
 
 % Make sure EEGLAB (base directory) and support functions are added to the MATLAB path.
-AddPath ( 'reset' );
+%AddPath ( 'reset' );
 AddPath ( 'eeglab' );
 AddPath ( 'support' );
 
@@ -94,8 +131,11 @@ for file = 1 : numel ( files )
 		
 		% Rename relevant events.
 		events = { EEG.event.type };
-		for r = 1 : numel( cfg.events.related )
-			events = strrep( events, cfg.events.related{ r }, 'related' );
+		for r = 1 : numel( cfg.events.symmetry )
+			events = strrep( events, cfg.events.symmetry{ r }, 'symmetry' );
+		end
+		for r = 1 : numel( cfg.events.equivalence )
+			events = strrep( events, cfg.events.equivalence{ r }, 'equivalence' );
 		end
 		for r = 1 : numel( cfg.events.unrelated )
 			events = strrep( events, cfg.events.unrelated{ r }, 'unrelated' );
@@ -194,6 +234,32 @@ for file = 1 : numel ( files )
 			% State number of epochs after epoch rejection to command window.
 			ch_verbose ( sprintf( '   %s: %d', cfg.epoch.events{ r }, length ( epochs ) ), 2, 2);
 		end
+		
+		% Generate single-trial plots.
+		ch_output_separator;
+		ch_verbose ( 'Plotting ERPs - single trial and average with SD...', 2, 2 );
+		st_fig = ch_vis_singletrials ( EEG, cfg.st_plot );
+		
+		% Save and close the figure from ch_vis_singletrials.
+		% If the save directory doesn't exist, create it; then save.
+		if ~exist ( sprintf( '%s%s', output_dir, 'Single trials plots' ), 'dir' )
+			mkdir ( sprintf( '%s%s', output_dir, 'Single trials plots' ) );
+		end
+		saveas ( st_fig, sprintf( '%s/%s.png', sprintf( '%s%s', output_dir, 'Single trials plots' ), EEG.setname ) );
+		close ( st_fig );
+		
+		% Generate condition comparison plots.
+		ch_output_separator;
+		ch_verbose ( 'Plotting ERPs - condition averages...', 2, 2 );
+		comp_fig = ch_vis_erpcompare ( EEG, cfg.comp_plot );
+		
+		% Save and close the figure from ch_vis_singletrials.
+		% If the save directory doesn't exist, create it; then save.
+		if ~exist ( sprintf( '%s%s', output_dir, 'ERP comparison plots' ), 'dir' )
+			mkdir ( sprintf( '%s%s', output_dir, 'ERP comparison plots' ) );
+		end
+		saveas ( comp_fig, sprintf( '%s/%s.png', sprintf( '%s%s', output_dir, 'ERP comparison plots' ), EEG.setname ) );
+		close ( comp_fig );
 		
 		% Save the processed EEG file.
 		ch_output_separator;

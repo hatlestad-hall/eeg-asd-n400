@@ -1,4 +1,4 @@
-asd_extractN400( )
+% asd_extractN400( )
 
 % ASD_EXTRACTN400 extracts the N400 amplitude from epoched EEG files
 %
@@ -27,9 +27,11 @@ cfg.chan_clusters = { ...
 
 cfg.cluster_labels = { 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9' };
 
-cfg.timelocks = { '', '' };
+% cfg.timelocks = { 'related', 'unrelated' };
+cfg.timelocks = { 'symmetry', 'equivalence', 'unrelated' };
 
-cfg.cond_labels = { '', '' };
+% cfg.cond_labels = { 'IM_REL', 'IM_UNR' };
+cfg.cond_labels = { 'IM_SYM', 'IM_EQV', 'IM_UNR' };
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -40,44 +42,60 @@ files = ch_selectfiles( 'set', 'on' );
 % generate a list of subject identifiers to use as row names
 sub_list = cell( numel( files ), 1 );
 for s = 1 : numel( files )
-	[ ~, sub_list{ s } ] = fileparts( sprintf( '%s\\%s', files( f ).folder, files( f ).name ) );
+	[ ~, sub_list{ s } ] = fileparts( sprintf( '%s\\%s', files( s ).folder, files( s ).name ) );
 end
 
 % set up the summary table
-out = array2table( zeros( numel( files ), numel( cfg.cluster_labels ) * cfg.timelocks ), 'RowNames', sub_list );
+out = array2table( zeros( numel( files ), numel( cfg.cluster_labels ) * numel( cfg.timelocks ) ), 'RowNames', sub_list );
 
 % add the subject identifiers as the first table variable (easier when exporting to *.xlsx)
 out = addvars( out, sub_list, 'Before', 1, 'NewVariableNames', 'Sub_ID' );
+
+% collect group tags
+group_list = cell( numel( files ), 1 );
 
 % loop subjects
 for f = 1 : numel( files )
 	
 	% load the file
 	EEG = pop_loadset( sprintf( '%s\\%s', files( f ).folder, files( f ).name ) );
+	group_list{ f } = EEG.group;
+	
+	% get the time samples corresponding to the time window limits
+	time_low = ch_find_nearest( EEG.times, cfg.time_window( 1 ) );
+	time_upp = ch_find_nearest( EEG.times, cfg.time_window( 2 ) );
+	
+	% set the column tracker
+	col = 1;
 	
 	% loop the timelock events
 	for t = 1 : numel( cfg.timelocks )
 		
 		% identify the epochs from which the average amplitude should be extracted
 		all_events	= { EEG.event.type };
-		epochs		= EEG.event( ismember( all_events, cfg.timelocks{ t } ) ).epoch;
+		epochs		= [ EEG.event( ismember( all_events, cfg.timelocks{ t } ) ).epoch ];
 		
 		% loop the channel clusters
-		for c = numel( cfg.cluster_labels )
+		for c = 1 : numel( cfg.cluster_labels )
 			measures		= zeros( length( epochs ), 1 );
 			chan_indices	= ch_channels( '64', cfg.chan_clusters{ c } );
 			
 			% loop the epochs
 			for e = 1 : length( epochs )
-				measures( e ) = mean( EEG.data( chan_indices, cfg.time_window, epochs( e ) ) );
+				measures( e ) = mean( EEG.data( chan_indices, time_low : time_upp, epochs( e ) ), 'all' );
 			end
 			
 			% add the cluster average to the output table
-			out{ f, sprintf( '%s_%s', cfg.cond_labels{ t }, cfg.cluster_labels{ c } ) } = mean( measures );
+			col = col + 1;
+			out{ f, col } = mean( measures );
+			out.Properties.VariableNames{ col } = sprintf( '%s_%s', cfg.cond_labels{ t }, cfg.cluster_labels{ c } );
 		end
 	end
 end
 
+% add group identifier as the second table variable
+out = addvars( out, group_list, 'After', 1, 'NewVariableNames', 'Group' );
+
 % write the output table to an Excel spreadsheet
-writetable( out, '*.xlsx' );
+writetable( out, sprintf( '%s\\n400.xlsx', files( 1 ).folder ) );
 
