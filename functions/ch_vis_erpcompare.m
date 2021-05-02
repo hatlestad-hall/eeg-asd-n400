@@ -1,13 +1,13 @@
 %% About function
 %
 % Name:		ch_vis_comp_erp
-% Version:	1.1
+% Version:	1.11
 %
 % Christoffer Hatlestad-Hall
 %
 %
 % Date created:			10 Jan 2020
-% Date last modified:	02 Apr 2020
+% Date last modified:	01 May 2021
 %
 % ------------------------------------------------------------------------------------------------------------------------------------------------ %
 %
@@ -102,7 +102,7 @@ all_events	= { EEG.epoch.eventtype };
 for r = 1 : length ( events_row )
 	
 	% Identify epochs defined by current event(s).
-	epochs = find ( contains( all_events, events_row{ r } ) );
+	epochs = find ( startsWith( all_events, events_row{ r } ) );
 	
 	% Store the number of epochs included in the condition.
 	epochs_nb( r ) = length ( epochs );
