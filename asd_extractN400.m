@@ -12,6 +12,8 @@
 
 % PARAMETERS
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+cfg.filename = 'N400-MastRef-WO-RelUnr';
+
 cfg.time_window = [ 300, 500 ];
 
 cfg.chan_clusters = { ...
@@ -27,11 +29,12 @@ cfg.chan_clusters = { ...
 
 cfg.cluster_labels = { 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9' };
 
-% cfg.timelocks = { 'related', 'unrelated' };
-cfg.timelocks = { 'symmetry', 'equivalence', 'unrelated' };
+cfg.timelocks = { 'related', 'unrelated' };
+% cfg.timelocks = { 'symmetry', 'equivalence', 'unrelated' };
 
 % cfg.cond_labels = { 'IM_REL', 'IM_UNR' };
-cfg.cond_labels = { 'IM_SYM', 'IM_EQV', 'IM_UNR' };
+cfg.cond_labels = { 'WO_REL', 'WO_UNR' };
+% cfg.cond_labels = { 'IM_SYM', 'IM_EQV', 'IM_UNR' };
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -46,7 +49,8 @@ for s = 1 : numel( files )
 end
 
 % set up the summary table
-out = array2table( zeros( numel( files ), numel( cfg.cluster_labels ) * numel( cfg.timelocks ) ), 'RowNames', sub_list );
+out = array2table( zeros( numel( files ), ( numel( cfg.cluster_labels ) * numel( cfg.timelocks ) ) + numel( cfg.timelocks ) ), ...
+	'RowNames', sub_list );
 
 % add the subject identifiers as the first table variable (easier when exporting to *.xlsx)
 out = addvars( out, sub_list, 'Before', 1, 'NewVariableNames', 'Sub_ID' );
@@ -75,6 +79,11 @@ for f = 1 : numel( files )
 		all_events	= { EEG.event.type };
 		epochs		= [ EEG.event( ismember( all_events, cfg.timelocks{ t } ) ).epoch ];
 		
+		% store number of trials in condition
+		col = col + 1;
+		out{ f, col } = length( epochs );
+		out.Properties.VariableNames{ col } = sprintf( '%s_nTrials', cfg.cond_labels{ t } );
+		
 		% loop the channel clusters
 		for c = 1 : numel( cfg.cluster_labels )
 			measures		= zeros( length( epochs ), 1 );
@@ -97,5 +106,5 @@ end
 out = addvars( out, group_list, 'After', 1, 'NewVariableNames', 'Group' );
 
 % write the output table to an Excel spreadsheet
-writetable( out, sprintf( '%s\\n400.xlsx', files( 1 ).folder ) );
+writetable( out, sprintf( '%s\\%s.xlsx', files( 1 ).folder, cfg.filename ) );
 

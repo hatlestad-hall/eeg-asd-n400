@@ -14,6 +14,7 @@ cfg.events.unrelated	= { 'Im B1 UR1', 'Im B1 UR2', 'Im B2 UR1', 'Im B2 UR2' };
 
 % Re-reference.
 cfg.reref		= { 'P9', 'P10' };
+% cfg.reref		= [];
 cfg.montage		= '64';
 
 % Epoch segmentation.
@@ -33,7 +34,7 @@ cfg.ep_rej.channels			= { ...
 	'POz', 'Pz', ...
 	'P2', 'P4', 'P6', 'PO4' };
 cfg.ep_rej.abs_threshold	= [ -75, 75 ];
-cfg.ep_rej.abs_timewindow	= [ -600, 1000 ];
+cfg.ep_rej.abs_timewindow	= [ 0, 500 ];
 cfg.ep_rej.prob_thresh_loc	= 5;
 cfg.ep_rej.prob_thresh_glob	= 20;
 
@@ -211,7 +212,7 @@ for file = 1 : numel ( files )
 		% Store the number of identified epochs for each method; then, reject the bad epochs.
 		log.epochs_rej_abs	= sum ( EEG_eprej.reject.rejthresh );
 		log.epochs_rej_prob = sum ( EEG_eprej.reject.rejjp );
-		log.epochs_rej_percent = ( sum( log.orig_epochs_nb ) / sum( log.epochs_rej_abs, log.epochs_rej_prob ) ) / 100;
+		log.epochs_rej_percent = ( sum( [ log.epochs_rej_abs, log.epochs_rej_prob ] ) / sum( log.orig_epochs_nb ) ) * 100;
 		EEG = pop_rejepoch ( EEG, bad_epochs, 0 );
 		EEG.setname = setname;
 		EEG_eprej = [ ];
