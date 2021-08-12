@@ -1,16 +1,16 @@
 %% Configuration
 
 % Debug mode.
-debug_mode	= false;
+debug_mode	= true;
 
 % Group.
 cfg.group	= 'patient';
 
 % Events.
-cfg.events.related		= { 'Im B1 Sym', 'Im B1 Eqv', 'Im B2 Sym', 'Im B2 Eqv' };
-cfg.events.unrelated	= { 'Im B1 UR1', 'Im B1 UR2', 'Im B2 UR1', 'Im B2 UR2' };
-% cfg.events.related		= { 'Wo B1 Sym', 'Wo B1 Eqv', 'Wo B2 Sym', 'Wo B2 Eqv' };
-% cfg.events.unrelated	= { 'Wo B1 UR1', 'Wo B1 UR2', 'Wo B2 UR1', 'Wo B2 UR2' };
+% cfg.events.related		= { 'Im B1 Sym', 'Im B1 Eqv', 'Im B2 Sym', 'Im B2 Eqv' };
+% cfg.events.unrelated	= { 'Im B1 UR1', 'Im B1 UR2', 'Im B2 UR1', 'Im B2 UR2' };
+cfg.events.related		= { 'Wo B1 Sym', 'Wo B1 Eqv', 'Wo B2 Sym', 'Wo B2 Eqv' };
+cfg.events.unrelated	= { 'Wo B1 UR1', 'Wo B1 UR2', 'Wo B2 UR1', 'Wo B2 UR2' };
 
 % Re-reference.
 cfg.reref		= { 'P9', 'P10' };
@@ -67,10 +67,10 @@ cfg.comp_plot.visible		= 'off';
 
 %% Preparation
 
-% Make sure EEGLAB (base directory) and support functions are added to the MATLAB path.
-%AddPath ( 'reset' );
-AddPath ( 'eeglab' );
-AddPath ( 'support' );
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Make sure EEGLAB and the required plugins, and support
+% functions are available on the MATLAB path.
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Select files.
 ch_verbose ( 'Select input file(s)...', 2, 2 );

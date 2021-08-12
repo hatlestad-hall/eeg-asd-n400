@@ -1,10 +1,10 @@
 %% Configuration
 
 % Debug mode.
-debug_mode	= false;
+debug_mode	= true;
 
 % Support for non-regular files, which have been saved as a *.set file beforehand.
-set_mode = true;
+set_mode = false;
 
 % Channel extraction and position information.
 cfg.channels	= 1 : 64;

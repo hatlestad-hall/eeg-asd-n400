@@ -4,7 +4,7 @@
 debug_mode	= false;
 
 % Group.
-cfg.group	= 'control';
+cfg.group	= 'patient';
 
 % Events.
 cfg.events.symmetry		= { 'Im B1 Sym',  'Im B2 Sym' };
@@ -66,10 +66,10 @@ cfg.comp_plot.visible		= 'off';
 
 %% Preparation
 
-% Make sure EEGLAB (base directory) and support functions are added to the MATLAB path.
-%AddPath ( 'reset' );
-AddPath ( 'eeglab' );
-AddPath ( 'support' );
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Make sure EEGLAB and the required plugins, and support
+% functions are available on the MATLAB path.
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Select files.
 ch_verbose ( 'Select input file(s)...', 2, 2 );
