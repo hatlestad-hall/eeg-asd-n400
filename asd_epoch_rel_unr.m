@@ -4,13 +4,13 @@
 debug_mode	= true;
 
 % Group.
-cfg.group	= 'patient';
+cfg.group	= 'control';
 
 % Events.
-% cfg.events.related		= { 'Im B1 Sym', 'Im B1 Eqv', 'Im B2 Sym', 'Im B2 Eqv' };
-% cfg.events.unrelated	= { 'Im B1 UR1', 'Im B1 UR2', 'Im B2 UR1', 'Im B2 UR2' };
-cfg.events.related		= { 'Wo B1 Sym', 'Wo B1 Eqv', 'Wo B2 Sym', 'Wo B2 Eqv' };
-cfg.events.unrelated	= { 'Wo B1 UR1', 'Wo B1 UR2', 'Wo B2 UR1', 'Wo B2 UR2' };
+cfg.events.related		= { 'Im B1 Sym', 'Im B1 Eqv', 'Im B2 Sym', 'Im B2 Eqv' };
+cfg.events.unrelated	= { 'Im B1 UR1', 'Im B1 UR2', 'Im B2 UR1', 'Im B2 UR2' };
+% cfg.events.related		= { 'Wo B1 Sym', 'Wo B1 Eqv', 'Wo B2 Sym', 'Wo B2 Eqv' };
+% cfg.events.unrelated	= { 'Wo B1 UR1', 'Wo B1 UR2', 'Wo B2 UR1', 'Wo B2 UR2' };
 
 % Re-reference.
 cfg.reref		= { 'P9', 'P10' };

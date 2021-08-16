@@ -4,7 +4,7 @@
 debug_mode	= false;
 
 % Group.
-cfg.group	= 'patient';
+cfg.group	= 'control';
 
 % Events.
 cfg.events.symmetry		= { 'Im B1 Sym',  'Im B2 Sym' };

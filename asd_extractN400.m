@@ -12,7 +12,7 @@
 
 % PARAMETERS
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-cfg.filename = 'N400-MastRef-IM-SymEqvUnr';
+cfg.filename = 'N400-MastRef-IM-RelUnr';
 
 cfg.time_window = [ 300, 500 ];
 
@@ -29,12 +29,12 @@ cfg.chan_clusters = { ...
 
 cfg.cluster_labels = { 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9' };
 
-% cfg.timelocks = { 'related', 'unrelated' };
-cfg.timelocks = { 'symmetry', 'equivalence', 'unrelated' };
+cfg.timelocks = { 'related', 'unrelated' };
+% cfg.timelocks = { 'symmetry', 'equivalence', 'unrelated' };
 
 % cfg.cond_labels = { 'IM_REL', 'IM_UNR' };
-% cfg.cond_labels = { 'WO_REL', 'WO_UNR' };
-cfg.cond_labels = { 'IM_SYM', 'IM_EQV', 'IM_UNR' };
+cfg.cond_labels = { 'WO_REL', 'WO_UNR' };
+% cfg.cond_labels = { 'IM_SYM', 'IM_EQV', 'IM_UNR' };
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
